@@ -52,15 +52,31 @@ def _setup_logging():
     # 每日一个文件，使用追加模式
     log_file = os.path.join(log_dir, f'proxy_{datetime.now().strftime("%Y%m%d")}.log')
 
-    # 配置日志格式和处理器
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_file, mode='a', encoding='utf-8')
-        ]
-    )
-    return logging.getLogger(__name__)
+    # 创建专用的logger，避免使用basicConfig
+    logger = logging.getLogger('proxy_logger')
+
+    # 清除已存在的handlers，避免重复配置
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+
+    # 设置logger级别
+    logger.setLevel(logging.INFO)
+
+    # 创建文件处理器
+    file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+    file_handler.setLevel(logging.INFO)
+
+    # 创建格式器
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    file_handler.setFormatter(formatter)
+
+    # 添加处理器到logger
+    logger.addHandler(file_handler)
+
+    # 防止日志传播到根logger
+    logger.propagate = False
+
+    return logger
 
 logger = _setup_logging()
 
@@ -77,9 +93,10 @@ def request(flow: http.HTTPFlow):
     if "application/json" in ct:
         try:
             body = json.loads(flow.request.get_text() or "{}")
-            model = body.get("model")
-            logger.info(f"  req.json keys={list(body.keys())} model={model}")
-            # 如需完整提示词，谨慎记录：logger.info(json.dumps(body, ensure_ascii=False))
+            #model = body.get("model")
+            # logger.info(f"  req.json keys={list(body.keys())} model={model}")
+            # 如需完整提示词，谨慎记录：
+            logger.info(json.dumps(body, ensure_ascii=False))
         except Exception:
             pass
 
@@ -98,6 +115,9 @@ def response(flow: http.HTTPFlow):
 
 def main():
     print("Hello from http-proxy-log!")
+    # 测试日志记录功能
+    logger.info("测试日志记录功能 - 这条消息应该出现在日志文件中")
+    logger.info("Current time for testing: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
 if __name__ == "__main__":

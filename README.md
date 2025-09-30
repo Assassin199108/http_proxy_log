@@ -46,7 +46,7 @@ uv pip install -e .
 
 ```bash
 # 使用 mitmdump 启动
-mitmdump -s main.py
+mitmproxy --mode reverse:{具体代理的url} -p 8080 -s main.py
 
 # 或者直接运行主程序
 python main.py
