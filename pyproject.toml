@@ -1,0 +1,16 @@
+[project]
+name = "http-proxy-log"
+version = "0.1.0"
+description = "HTTP proxy logging tool for monitoring API requests and responses"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mitmproxy>=10.0.0"
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+http-proxy-log = "main:main"
